@@ -7,6 +7,35 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const v = new Validator();
 
+// GET /v1/news/search - Search for news by title or content
+router.get('/search', async (req, res) => {
+    const { query } = req.query; // Mengambil query dari parameter URL
+    try {
+        const news = await prisma.news.findMany({
+            where: {
+                OR: [
+                    {
+                        title: { contains: query, mode: 'insensitive' },
+                    },
+                    {
+                        content: { contains: query, mode: 'insensitive' },
+                    },
+                ]
+            },
+            take: 10 // Mengambil 10 berita
+        });
+
+        // Jika tidak ada berita ditemukan
+        if (news.length === 0) {
+            return res.status(404).json(BaseResponse(null, 404, 'No news found'));
+        }
+
+        return res.status(200).json(BaseResponse(news, 200, 'Ok'));
+    } catch (err) {
+        return ErrorResponse(err, res);
+    }
+});
+
 // POST /v1/news - Create a new news article
 router.post('/', VerifyToken, async (req, res) => {
     try {
@@ -15,25 +44,37 @@ router.post('/', VerifyToken, async (req, res) => {
             return res.status(401).json(BaseResponse(null, 401, "Token missing or invalid"));
         }
         
+        
+        // Ekstrak token dan decode menggunakan ParseToken
+
         // Ekstrak token dan decode menggunakan ParseToken
         const token = authHeader.split(" ")[1];
         const userData = ParseToken(token);
 
-        const { title, content } = req.body;
+        const { title, content, category_id } = req.body;
 
         // Validation schema
         const schema = {
             title: { type: "string", min: 5, max: 255, nullable: false },
             content: { type: "string", nullable: false },
+            category_id: { type: "number", integer: true, positive: true, nullable: false }
         };
         const validationResponse = v.validate(req.body, schema);
         if (validationResponse !== true) {
             return res.status(400).json(BaseResponse(null, 400, 'Validation error'));
         }
 
+        // Check if category exists
+        const categoryExists = await prisma.category.findUnique({
+            where: { id: category_id }
+        });
+        if (!categoryExists) {
+            return res.status(404).json(BaseResponse(null, 404, 'Category not found'));
+        }
+
         // Create news
         const newNews = await prisma.news.create({
-            data: { title, content, published_by: userData.id  }
+            data: { title, content, published_by: userData.id, category_id }
         });
 
         return res.status(201).json(BaseResponse(newNews, 201, 'Created'));
@@ -49,22 +90,31 @@ router.post('/', VerifyToken, async (req, res) => {
 router.put('/:newsId', VerifyToken, async (req, res) => {
     try {
         const newsId = parseInt(req.params.newsId);
-        const { title, content } = req.body;
+        const { title, content, category_id } = req.body;
 
         // Validation schema
         const schema = {
             title: { type: "string", min: 5, max: 255, nullable: false },
-            content: { type: "string", nullable: false }
+            content: { type: "string", nullable: false },
+            category_id: { type: "number", integer: true, positive: true, nullable: false }
         };
         const validationResponse = v.validate(req.body, schema);
         if (validationResponse !== true) {
             return res.status(400).json(BaseResponse(null, 400, 'Validation error'));
         }
 
+        // Check if category exists
+        const categoryExists = await prisma.category.findUnique({
+            where: { id: category_id }
+        });
+        if (!categoryExists) {
+            return res.status(404).json(BaseResponse(null, 404, 'Category not found'));
+        }
+
         // Update news
         const updatedNews = await prisma.news.update({
             where: { id: newsId },
-            data: { title, content }
+            data: { title, content, category_id }
         });
 
         return res.status(200).json(BaseResponse(updatedNews, 200, 'Updated'));
@@ -123,28 +173,6 @@ router.get('/', async (req, res) => {
         }
 
         return res.status(200).json(BaseResponse(newsList, 200, 'Ok'));
-    } catch (err) {
-        return ErrorResponse(err, res);
-    }
-});
-
-// GET /v1/news/search - Search for news by title or content
-router.get('/search', async (req, res) => {
-    const { query } = req.query; // Mengambil query dari parameter URL
-    try {
-        const news = await prisma.news.findMany({
-            where: {
-                title: { contains: query, mode: 'insensitive' } // Mencari berdasarkan konten
-            },
-            take: 10 // Mengambil 10 berita
-        });
-
-        // Jika tidak ada berita ditemukan
-        if (news.length === 0) {
-            return res.status(404).json(BaseResponse(null, 404, 'No news found'));
-        }
-
-        return res.status(200).json(BaseResponse(news, 200, 'Ok'));
     } catch (err) {
         return ErrorResponse(err, res);
     }

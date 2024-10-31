@@ -1,7 +1,7 @@
 const supertest = require("supertest");
-const { app } = require("../app");
+const { app } = require("../app.js");
 const { logger } = require("../config/logger.js");
-const { createTestUser, removeTestUser } = require("./test-util");
+const { createTestUser, removeTestUser } = require("./test-util.js");
 
 
 

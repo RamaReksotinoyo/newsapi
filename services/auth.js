@@ -1,4 +1,3 @@
-const { db } = require('../config/logger') ;
 const express = require('express');
 const router = express.Router();
 const { CreateToken, ParseToken, VerifyToken } = require('../middleware/token');

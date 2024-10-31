@@ -35,6 +35,8 @@ model Category {
   id        Int      @id @default(autoincrement())
   name      String   @unique @db.VarChar(20)
   createdAt DateTime @default(now()) @map("created_at")
+
+  news      News[] // Menyimpan daftar berita yang terkait dengan kategori ini
 }
 
 model News {
@@ -44,8 +46,10 @@ model News {
   published_by Int
   published_at DateTime @default(now())
   updated_at   DateTime? @updatedAt
+  category_id  Int
 
-  user User @relation(fields: [published_by], references: [id])
+  user     User     @relation(fields: [published_by], references: [id])
+  category Category @relation(fields: [category_id], references: [id])
 
   @@map("news") // Maps this model to the "news" table in the database
 }

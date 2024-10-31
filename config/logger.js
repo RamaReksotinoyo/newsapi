@@ -1,21 +1,3 @@
-// const { Pool } = require('pg');
-
-// const db = new Pool({
-//     user: 'ramaido',
-//     host: 'localhost',
-//     database: 'news',
-//     password: 'fafifu',
-//     port: 5432,
-// });
-
-// db.connect((err) => {
-//     if (err) throw err; 
-//         console.log('Connected to database')
-// });
-
-// module.exports = { db };
-
-
 const { PrismaClient } = require('@prisma/client');
 const winston = require('winston');
 

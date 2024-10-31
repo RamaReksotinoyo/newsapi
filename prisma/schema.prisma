@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id   Int     @id @default(autoincrement())
+  name String  @unique @db.VarChar(20)
+  users User[] // Relasi dengan model User
+}
+
+// Model untuk tabel users
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique @db.VarChar(50)
+  password  String   @db.VarChar(255)
+  role_id   Int
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  role      Role     @relation(fields: [role_id], references: [id]) // Relasi dengan model Role
+  news      News[]   // Relation field to connect News to User
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+}
+
+model News {
+  id           Int      @id @default(autoincrement())
+  title        String   @unique @db.VarChar(255)
+  content      String   @db.Text
+  published_by Int
+  published_at DateTime @default(now())
+  updated_at   DateTime? @updatedAt
+
+  user User @relation(fields: [published_by], references: [id])
+
+  @@map("news") // Maps this model to the "news" table in the database
+}

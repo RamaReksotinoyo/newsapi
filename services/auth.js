@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { CreateToken, ParseToken, VerifyToken } = require('../middleware/token');
+const { DecryptPassword } = require('../middleware/hash');
 const { ErrorResponse, BaseResponse } = require('../response/responses');
 const Validator = require("fastest-validator");
 const v = new Validator();

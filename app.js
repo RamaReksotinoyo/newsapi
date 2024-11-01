@@ -9,9 +9,6 @@ app.use(morgan('common'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-const port = 3000;
-
 app.get('/', (req, res) => {
   res.send('Hello World!')
 });

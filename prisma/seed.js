@@ -1,4 +1,4 @@
-const { prismaClient } = require("../config/logger");
+const { logger, prismaClient } = require('../config/logger');
 // const prismaClient = new PrismaClient();
 const bcrypt = require("bcrypt");
 

@@ -8,10 +8,19 @@ Postman Docs:
 
 Follow these steps to run the application:
 
-1. Run `npm install` to install dependencies.
-2. Run `npx prisma migrate reset` to migrate the database.
-3. Run `node prisma/seed.js` to initialize with dummy data. The username and password can be found in the file.
-4. Finally, run the entry point using `node serve.js`.
+1. Create .env file, based on .env.example file.
+2. Run `npm install` to install dependencies.
+3. Run `npx prisma migrate --name init` to migrate the database.
+4. Run `node prisma/seed.js` to initialize with dummy data. The username and password can be found in the file.
+5. Finally, run the entry point using `node serve.js`.
+
+Another way, using docker, the steps are:
+1. Create an .env file, based on the .env.example file.
+2. Run docker-compose up --build -d.
+3. Log in to the docker terminal, and run docker exec -it backend /bin/bash
+4. Run `npx prism migrate --name init` to migrate the database.
+5. Run `node prisma/seed.js` to initialize with dummy data. The username and password can be found in the file.
+
 
 ## Unit & Integration Test
 
